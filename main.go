@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	"gopkg.in/yaml.v3"
 
 	"github.com/ful09003/unto/internal"
 )
@@ -20,9 +18,11 @@ var (
 )
 
 func main() {
+	cwd, _ := os.Executable()
+	flagSaveToDir := flag.String("savedir", cwd, "directory to save unto outputs into")
+
 	origEnviron := os.Environ()
 	flag.Parse()
-
 	inFlags := flag.Args()
 
 	ctx, cancel := context.WithTimeout(context.Background(), *flagCommandTimeout)
@@ -35,13 +35,10 @@ func main() {
 		WithExecTime(time.Now())
 
 	if err := cmdStruct.Exec(); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
-	out, err := yaml.Marshal(cmdStruct.ToMarshalable())
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err := internal.PersistOutput(*flagSaveToDir, cmdStruct.ToMarshalable()); err != nil {
+		log.Println(err)
 	}
-	fmt.Println(string(out))
 }
