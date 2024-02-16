@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type ExecutorWithOutErrPipes interface {
@@ -45,4 +46,30 @@ func (c CommandExecutor) GetProcessState() *os.ProcessState {
 
 func (c CommandExecutor) GetArgs() []string {
 	return c.c.Args
+}
+
+type MockExecutor struct{}
+
+func (m MockExecutor) StdoutPipe() (io.ReadCloser, error) {
+	return io.NopCloser(strings.NewReader("stdout")), nil
+}
+
+func (m MockExecutor) StderrPipe() (io.ReadCloser, error) {
+	return io.NopCloser(strings.NewReader("stderr")), nil
+}
+
+func (m MockExecutor) Start() error {
+	return nil
+}
+
+func (m MockExecutor) Wait() error {
+	return nil
+}
+
+func (m MockExecutor) GetProcessState() *os.ProcessState {
+	return &os.ProcessState{}
+}
+
+func (m MockExecutor) GetArgs() []string {
+	return []string{"arg1", "arg2"}
 }
