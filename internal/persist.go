@@ -9,7 +9,7 @@ import (
 )
 
 func PersistOutput(p string, output Marshalable) error {
-	if err := ensureExists(p); err != nil {
+	if err := os.MkdirAll(p, 0700); err != nil {
 		return err
 	}
 	out, err := yaml.Marshal(output)
@@ -18,8 +18,4 @@ func PersistOutput(p string, output Marshalable) error {
 	}
 	fName := fmt.Sprintf("%s_%d", output.Command, output.InvokedAt.UTC().Unix())
 	return os.WriteFile(path.Join(p, fName), out, 0600)
-}
-
-func ensureExists(p string) error {
-	return os.MkdirAll(p, 0700)
 }
